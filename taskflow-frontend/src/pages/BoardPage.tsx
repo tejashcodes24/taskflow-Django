@@ -29,6 +29,8 @@ export function BoardPage() {
     isLoading, error, selectedTask, setSelectedTask,
   } = useBoardStore();
 
+  const [onlineMembers, setOnlineMembers] = useState<{userId: string, name: string, role: string}[]>([]);
+
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<Membership[]>([]);
   const [activity, setActivity] = useState<ActivityLog[]>([]);
@@ -37,7 +39,6 @@ export function BoardPage() {
   const [showInvite, setShowInvite] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
-  const [socketConnected, setSocketConnected] = useState(false);
 
   // Connect to the project's WebSocket room
   useProjectSocket(projectId!);
@@ -45,15 +46,17 @@ export function BoardPage() {
   // Track socket connection status for the live indicator
   useEffect(() => {
     const socket = getSocket();
-    setSocketConnected(socket.connected);
-    socket.on('connect', () => setSocketConnected(true));
-    socket.on('disconnect', () => setSocketConnected(false));
+    socket.on('members:online', (data) => {
+      if (data.projectId === projectId) {
+        setOnlineMembers(data.onlineMembers);
+      }
+    });
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
+      socket.off('members:online');
     };
-  }, []);
+  }, [projectId]);
 
+  
   const fetchBoard = async () => {
     if (!projectId) return;
     setLoading(true);
@@ -115,17 +118,20 @@ export function BoardPage() {
         title={project?.name ?? 'Board'}
         actions={
           <div className="flex items-center gap-2">
-            {/* Live connection indicator */}
-            <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full border
-              ${socketConnected
-                ? 'text-green-400 border-green-500/30 bg-green-500/10'
-                : 'text-slate-500 border-slate-700 bg-slate-800'
-              }`}>
-              <div className={`w-1.5 h-1.5 rounded-full
-                ${socketConnected ? 'bg-green-400 animate-pulse' : 'bg-slate-500'}`}
-              />
-              {socketConnected ? 'Live' : 'Offline'}
-            </div>
+            {/* Online members indicator */}
+            {onlineMembers.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full border
+                              border-green-500/30 bg-green-500/10">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <div className="flex items-center gap-1.5">
+                  {onlineMembers.map((m) => (
+                    <span key={m.userId} className="text-xs text-green-400 font-medium">
+                      {m.name}{m.role === 'owner' && <span className="text-green-600 ml-0.5">★</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button variant="secondary" onClick={() => setShowMembers(true)}>
               <Users size={14} /> Members
