@@ -138,13 +138,7 @@ Make sure a PostgreSQL database named `taskflow` (or whatever you set `DB_NAME` 
 python manage.py migrate
 ```
 
-### 5. Create a superuser (optional, for Django admin)
-
-```powershell
-python manage.py createsuperuser
-```
-
-### 6. Run the development server
+### 5. Run the development server
 
 Because the project uses `python-socketio` mounted over ASGI, run it with `uvicorn` rather than the default `runserver` for full real-time support:
 
@@ -229,5 +223,5 @@ Deploy `taskflow-frontend/` as a standard Vite project. Set `VITE_API_URL` and `
 - JWT authentication with httpOnly refresh token rotation
 - Role-based project authorization (OWNER vs MEMBER)
 - Real-time per-project rooms via Socket.IO (live online-member tracking, board updates)
-- Task filtering, pagination, comments, and activity logs
+- Activity logs for monitoring information of  members and owners.
 - Dashboard aggregation endpoints
