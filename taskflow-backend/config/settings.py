@@ -126,6 +126,8 @@ CORS_ALLOW_CREDENTIALS = True
 # ── Refresh cookie config -- mirrors setRefreshCookie() in AuthController ──
 REFRESH_COOKIE_NAME = 'refresh_token'
 REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60  # 7 days, in seconds
-REFRESH_COOKIE_SECURE = not DEBUG
-REFRESH_COOKIE_SAMESITE = 'Strict'
+# REFRESH_COOKIE_SECURE = not DEBUG
+# REFRESH_COOKIE_SAMESITE = 'Strict'
+REFRESH_COOKIE_SECURE   = os.environ.get('REFRESH_COOKIE_SECURE', 'False') == 'True'
+REFRESH_COOKIE_SAMESITE = os.environ.get('REFRESH_COOKIE_SAMESITE', 'Strict')
 
